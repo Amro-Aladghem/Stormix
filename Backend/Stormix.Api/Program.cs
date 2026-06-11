@@ -1,14 +1,27 @@
+using Infrastructure.ExternalServices;
+using Mscc.GenerativeAI;
+using Mscc.GenerativeAI.Types;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddHttpClient("QdrantClient", (serviceProvider, client) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    client.DefaultRequestHeaders.Add("api-key", configuration["Qdrant:ApiKey"]);
+});
+
+builder.Services.AddSingleton<GoogleAI>(sp => new GoogleAI(apiKey: builder.Configuration.GetSection("geminiApi").Value!));
+builder.Services.AddSingleton<GenerationConfig>(gc => new GenerationConfig() { ResponseMimeType = "application/json", Temperature = 0 });
+builder.Services.AddScoped<AiEmbeddingService>();
+builder.Services.AddScoped<QdrantSegmentSearchService>();
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
