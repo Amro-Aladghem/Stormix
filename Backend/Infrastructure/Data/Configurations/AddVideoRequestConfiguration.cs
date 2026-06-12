@@ -13,7 +13,7 @@ namespace Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<AddVideoRequest> builder)
         {
             builder.Property(p => p.RequestedVideoUrl).HasMaxLength(1000);
-            throw new NotImplementedException();
+            builder.Property(p => p.UserEmail).HasMaxLength(200);
         }
     }
 }

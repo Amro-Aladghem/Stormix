@@ -11,7 +11,13 @@ namespace Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<SegmentQuestion> builder)
         {
-            throw new NotImplementedException();
+            builder.HasKey(sq => sq.Id);
+            builder.Property(sq => sq.Text).HasMaxLength(1000);
+            builder.Property(sq => sq.VideoSegmentId).IsRequired();
+
+            builder.HasOne(sq => sq.VideoSegment)
+                   .WithMany(vs => vs.SegmentQuestions)
+                   .HasForeignKey(sq => sq.VideoSegmentId);
         }
     }
 }

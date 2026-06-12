@@ -12,3 +12,7 @@ namespace Domain.Entities
         public List<VideoSegment> VideoSegments { get; set; }
     }
 }
+
+
+//insert into ExtractedVideos (Id,VideoUrl)
+//values 

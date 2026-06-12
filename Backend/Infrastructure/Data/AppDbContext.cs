@@ -1,7 +1,6 @@
 ﻿using Domain.Entities;
 using Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -31,6 +30,5 @@ namespace Infrastructure.Data
         public DbSet<SegmentQuestion> SegmentQuestions { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<VideoSegment> VideoSegments { get; set; }
-        public DbSet<VideoSegmentTag> VideoSegmentTags { get; set; }
     }
 }
