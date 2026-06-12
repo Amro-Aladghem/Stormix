@@ -20,6 +20,8 @@ builder.Services.AddScoped<AiEmbeddingService>();
 builder.Services.AddScoped<QdrantSegmentSearchService>();
 builder.Services.AddScoped<SearchResultService>();
 
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(Presentation.AssemblyRefference).Assembly);
 
 var app = builder.Build();
 

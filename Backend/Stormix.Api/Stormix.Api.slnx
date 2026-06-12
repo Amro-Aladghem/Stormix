@@ -2,5 +2,6 @@
   <Project Path="../Application/Application.csproj" />
   <Project Path="../Domain/Domain.csproj" />
   <Project Path="../Infrastructure/Infrastructure.csproj" />
+  <Project Path="../Presentation/Presentation.csproj" Id="7fb50263-8872-4228-9e51-e0804af601ca" />
   <Project Path="Stormix.Api.csproj" />
 </Solution>
