@@ -13,7 +13,7 @@ namespace Stormix.Api.ContextFactory
                 .Build();
 
             var builder = new DbContextOptionsBuilder<AppDbContext>()
-                .UseNpgsql(config.GetSection("sql_connection").Value, b => b.MigrationsAssembly("Stormix.Api"));
+                .UseNpgsql(config.GetSection("SQL_CONNECTION_STRING").Value, b => b.MigrationsAssembly("Stormix.Api"));
 
             return new AppDbContext(builder.Options);
         }
