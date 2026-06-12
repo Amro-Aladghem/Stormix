@@ -18,6 +18,7 @@ builder.Services.AddSingleton<GoogleAI>(sp => new GoogleAI(apiKey: builder.Confi
 builder.Services.AddSingleton<GenerationConfig>(gc => new GenerationConfig() { ResponseMimeType = "application/json", Temperature = 0 });
 builder.Services.AddScoped<AiEmbeddingService>();
 builder.Services.AddScoped<QdrantSegmentSearchService>();
+builder.Services.AddScoped<SearchResultService>();
 
 
 var app = builder.Build();
