@@ -1,0 +1,8 @@
+{
+  "name": "Stormix",
+  "description": "Search inside YouTube videos and navigate directly to key segments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

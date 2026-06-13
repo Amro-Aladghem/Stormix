@@ -36,6 +36,18 @@ builder.Services.AddScoped<VideoExtractedService>();
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(Presentation.AssemblyRefference).Assembly);
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -43,9 +55,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
-app.UseAuthorization();
+app.UseHttpsRedirection();
 
 app.MapControllers();
 
