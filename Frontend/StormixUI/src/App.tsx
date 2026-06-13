@@ -76,8 +76,37 @@ export default function App() {
   }, []);
 
   const active = useMemo(
-    () => results.find((r) => r.id === activeId) ?? results[0] ?? null,
-    [results, activeId]
+    () => {
+      const found = results.find((r) => r.id === activeId);
+      if (found) return found;
+
+      // If the segment was clicked from the timeline but is not a direct search hit
+      if (activeId && videoInfo && videoInfo.segments) {
+        const seg = videoInfo.segments.find((s) => s.segmentId === activeId);
+        if (seg) {
+          const firstInVid = results.find((r) => r.payload.videoId === videoInfo.videoId) ?? results[0];
+          if (firstInVid) {
+            return {
+              id: activeId,
+              score: 0.8,
+              payload: {
+                videoId: videoInfo.videoId,
+                segmentId: seg.segmentId,
+                url: firstInVid.payload.url,
+                start: seg.start,
+                end: seg.end,
+                primaryTopic: seg.primaryTopic,
+                summary: seg.summary,
+                tags: seg.tags,
+              },
+            } as SearchResult;
+          }
+        }
+      }
+
+      return results[0] ?? null;
+    },
+    [results, activeId, videoInfo]
   );
 
   // Fetch full video info when active changes
@@ -88,12 +117,14 @@ export default function App() {
     }
     const vid = active.payload.videoId;
     let cancelled = false;
+    setVideoInfo(null);
     setLoadingVideo(true);
     
     (async () => {
       let info: VideoInfo | null = null;
       try {
-        const res = await fetch(`/api/v1/videos/${vid}`);
+        const API_BASE_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_BASE_URL}/${vid}`);
         if (res.ok) {
           info = (await res.json()) as VideoInfo;
         }
@@ -145,7 +176,8 @@ export default function App() {
     setVideoInfo(null);
 
     try {
-      const res = await fetch("/api/v1/videos/search", {
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_BASE_URL}/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, tags }),
@@ -202,18 +234,23 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-all">
       {/* Upper Navigation Header bar */}
-      <header className="h-14 border-b border-border bg-card px-6 flex items-center justify-between shrink-0 z-40 sticky top-0">
-        <div className="flex-1 flex items-center justify-between gap-4">
+      <header className="h-14 border-b border-border bg-card px-3 sm:px-6 flex items-center justify-between shrink-0 z-40 sticky top-0">
+        <div className="flex-1 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex flex-col items-start select-none shrink-0">
           <button
             onClick={resetAll}
-            className="flex items-center gap-3 font-bold text-xl tracking-tight select-none cursor-pointer focus:outline-none text-primary"
+            className="flex items-center gap-2 sm:gap-3 font-bold text-lg sm:text-xl tracking-tight select-none cursor-pointer focus:outline-none text-primary shrink-0"
           >
             <TornadoMark />
-            <span className="text-[#e8e2d4]">Stormix</span>
+            <span className="hidden xs:inline sm:inline text-[#e8e2d4]">Stormix</span>
           </button>
+          <span className="text-[8px] font-extrabold text-primary border border-primary/20 px-1 py-0.2 bg-primary/10 rounded tracking-widest uppercase mt-0.5 pointer-events-none scale-90 origin-left">
+            Beta
+          </span>
+          </div>
           
           {state !== "empty" && (
-            <form onSubmit={runSearch} className="flex-1 max-w-2xl px-8 relative">
+            <form onSubmit={runSearch} className="flex-1 max-w-2xl px-1 sm:px-8 relative min-w-0">
               <div className="relative flex items-center bg-background rounded border border-[#444443] overflow-hidden focus-within:border-primary transition-colors">
                 <input
                   value={query}
@@ -221,11 +258,11 @@ export default function App() {
                   onFocus={() => setShowHistory(true)}
                   onBlur={() => setTimeout(() => setShowHistory(false), 200)}
                   placeholder="Ask Stormix…"
-                  className="flex-1 bg-transparent px-4 py-2 text-sm outline-none placeholder:text-[#666666]"
+                  className="flex-1 bg-transparent px-2 sm:px-4 py-2 text-xs sm:text-sm outline-none placeholder:text-[#666666] min-w-0"
                 />
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-bold bg-primary text-primary-foreground uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer"
+                  className="px-3 sm:px-5 py-2 text-[10px] sm:text-xs font-bold bg-primary text-primary-foreground uppercase tracking-wider hover:opacity-90 transition-all cursor-pointer shrink-0"
                 >
                   Search
                 </button>
@@ -315,12 +352,8 @@ export default function App() {
 
       {/* Footer bar status metrics */}
       <footer className="h-8 border-t border-border bg-[#1c1c1b] px-6 flex items-center justify-between shrink-0 text-[10px] text-[#555555] uppercase tracking-widest font-mono">
-        <div>Engine: Stormix-V3-GeminiPowered</div>
-        <div className="flex gap-6">
-          <span>Latency: 28ms</span>
-          <span>Results: Real-time Live Segments</span>
-          <span className="text-primary/40 font-bold italic">Live: YouTube API Grounding</span>
-        </div>
+        <div>Engine: Stormix-V1</div>
+          <span>Save Your Searching Time</span>
       </footer>
     </div>
   );

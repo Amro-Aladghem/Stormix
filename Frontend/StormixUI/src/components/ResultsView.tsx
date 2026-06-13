@@ -26,7 +26,19 @@ export default function ResultsView({
   loadingVideo,
 }: ResultsViewProps) {
   const ytId = getYouTubeId(active.payload.url);
-  const rest = results.filter((r) => r.id !== activeId);
+  
+  // Exclude active video and get one representative segment per other video for related videos column
+  const otherVideosList = useMemo(() => {
+    const seenVids = new Set<string>([active.payload.videoId]);
+    const list: SearchResult[] = [];
+    for (const r of results) {
+      if (!seenVids.has(r.payload.videoId)) {
+        seenVids.add(r.payload.videoId);
+        list.push(r);
+      }
+    }
+    return list;
+  }, [results, active.payload.videoId]);
 
   // Set of segment ID string keys that are matches for the current active search terms query
   const matchedSegIds = useMemo(
@@ -39,10 +51,83 @@ export default function ResultsView({
     [results, active.payload.videoId]
   );
 
+  const renderTimelineSegments = () => {
+    if (videoInfo?.segments && videoInfo.segments.length > 0) {
+      return videoInfo.segments.map((seg, idx) => {
+        const isMatch = matchedSegIds.has(seg.segmentId);
+        const isActive = seg.segmentId === active.payload.segmentId;
+
+        return (
+          <motion.div
+            key={seg.segmentId || idx}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: Math.min(idx * 0.04, 0.4) }}
+            className={
+              "rounded border transition-all text-left " +
+              (isActive
+                ? "border-primary/40 bg-primary/10"
+                : isMatch
+                ? "border-primary/25 bg-primary/5 hover:border-primary/40"
+                : "border-border bg-[#1c1c1b] opacity-70 hover:opacity-100")
+            }
+          >
+            <button
+              onClick={() => {
+                const found = results.find(
+                  (r) => r.payload.segmentId === seg.segmentId
+                );
+                if (found) {
+                  setActiveId(found.id);
+                } else {
+                  setActiveId(seg.segmentId);
+                }
+              }}
+              className="w-full text-left p-3 cursor-pointer focus:outline-none"
+            >
+              <div className="flex items-center justify-between gap-2 text-[10px] font-mono mb-1">
+                <span className="text-primary font-bold">
+                  {formatTime(seg.start)} — {formatTime(seg.end)}
+                </span>
+                <span className="text-[#888888] uppercase">EN</span>
+              </div>
+              <div className="text-xs font-semibold text-[#f2f1ef] leading-tight">
+                {seg.primaryTopic}
+              </div>
+              {isMatch && (
+                <div className="mt-2 text-[9px] flex items-center gap-1 text-primary">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  Matched Search
+                </div>
+              )}
+            </button>
+          </motion.div>
+        );
+      });
+    }
+
+    if (loadingVideo) {
+      return (
+        <div className="space-y-2 py-4 px-1">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div key={n} className="h-16 rounded bg-[#1c1c1b] animate-pulse border border-border/40" />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="text-xs text-[#888888] px-2 py-12 text-center flex flex-col items-center gap-2">
+        <AlertCircle className="w-5 h-5 opacity-40 text-muted-foreground" />
+        <span>No segments listed. Waiting for dynamic timeline processing.</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full h-[calc(100vh-3.5rem)] flex overflow-hidden">
-      {/* Dynamic sidebar timeline */}
-      <aside className="w-72 border-r border-border bg-[#212120] flex flex-col overflow-hidden shrink-0">
+    <div className="w-full min-h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden bg-[#161615]">
+      {/* Dynamic sidebar timeline for Desktop size */}
+      <aside className="hidden lg:flex w-72 border-r border-[#2d2d2c] bg-[#1c1c1b] flex-col shrink-0 h-full overflow-hidden">
         <div className="p-4 border-b border-border flex items-center justify-between bg-[#252524] shrink-0">
           <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#888888] flex items-center gap-1.5 select-none">
             <Clock className="w-3.5 h-3.5" /> Video Timeline
@@ -57,76 +142,12 @@ export default function ResultsView({
         </div>
 
         <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-[#212120]">
-          {videoInfo?.segments && videoInfo.segments.length > 0 ? (
-            videoInfo.segments.map((seg, idx) => {
-              const isMatch = matchedSegIds.has(seg.segmentId);
-              const isActive = seg.segmentId === active.payload.segmentId;
-
-              return (
-                <motion.div
-                  key={seg.segmentId || idx}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(idx * 0.04, 0.4) }}
-                  className={
-                    "rounded border transition-all text-left " +
-                    (isActive
-                      ? "border-primary/40 bg-primary/10"
-                      : isMatch
-                      ? "border-primary/25 bg-primary/5 hover:border-primary/40"
-                      : "border-border bg-[#1c1c1b] opacity-70 hover:opacity-100")
-                  }
-                >
-                  <button
-                    onClick={() => {
-                      const found = results.find(
-                        (r) => r.payload.segmentId === seg.segmentId
-                      );
-                      if (found) {
-                        setActiveId(found.id);
-                      } else {
-                        const fauxId = `${active.payload.videoId}_seg_${idx}`;
-                        setActiveId(fauxId);
-                      }
-                    }}
-                    className="w-full text-left p-3 cursor-pointer focus:outline-none"
-                  >
-                    <div className="flex items-center justify-between gap-2 text-[10px] font-mono mb-1">
-                      <span className="text-primary font-bold">
-                        {formatTime(seg.start)} — {formatTime(seg.end)}
-                      </span>
-                      <span className="text-[#888888] uppercase">EN</span>
-                    </div>
-                    <div className="text-xs font-semibold text-[#f2f1ef] leading-tight">
-                      {seg.primaryTopic}
-                    </div>
-                    {isMatch && (
-                      <div className="mt-2 text-[9px] flex items-center gap-1 text-primary">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        Matched Search
-                      </div>
-                    )}
-                  </button>
-                </motion.div>
-              );
-            })
-          ) : loadingVideo ? (
-            <div className="space-y-2 py-4 px-1">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <div key={n} className="h-16 rounded bg-[#1c1c1b] animate-pulse border border-border/40" />
-              ))}
-            </div>
-          ) : (
-            <div className="text-xs text-[#888888] px-2 py-12 text-center flex flex-col items-center gap-2">
-              <AlertCircle className="w-5 h-5 opacity-40 text-muted-foreground" />
-              <span>No segments listed. Waiting for dynamic timeline processing.</span>
-            </div>
-          )}
+          {renderTimelineSegments()}
         </div>
       </aside>
 
       {/* Main player search visual content panel */}
-      <section className="flex-1 overflow-y-auto p-6 bg-[#161615] flex flex-col min-w-0">
+      <section className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#161615] flex flex-col min-w-0">
         <div className="flex items-center gap-2 mb-4 shrink-0 overflow-x-auto pb-1 select-none">
           <span className="text-[10px] text-[#888888] uppercase tracking-widest pt-0.5">Tags:</span>
           {usedTags.length > 0 ? (
@@ -174,6 +195,25 @@ export default function ResultsView({
           </div>
         </div>
 
+        {/* Mobile-only inline timeline block to place timeline segments above related/more match info on small screens */}
+        <div className="block lg:hidden mb-6 border border-[#313130] rounded bg-[#1e1e1d] overflow-hidden">
+          <div className="p-3 border-b border-[#313130] flex items-center justify-between bg-[#242423] select-none">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#888888] flex items-center gap-1.5 font-sans">
+              <Clock className="w-3.5 h-3.5" /> Video Timeline
+            </h3>
+            {loadingVideo ? (
+              <span className="flex items-center gap-1 text-[10px] font-medium text-primary">
+                <Loader2 className="w-3 h-3 animate-spin" /> Syncing...
+              </span>
+            ) : (
+              <span className="text-[10px] text-primary opacity-80 select-none">Sync active</span>
+            )}
+          </div>
+          <div className="max-h-72 overflow-y-auto p-2 space-y-2">
+            {renderTimelineSegments()}
+          </div>
+        </div>
+
         {/* Segment Info Layout Block */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-8 max-w-7xl">
           <div>
@@ -214,7 +254,7 @@ export default function ResultsView({
                         </div>
                       </div>
                       <div className="text-[10px] font-bold text-primary mr-2 shrink-0">
-                        {Math.round(r.score * 100)}%
+                        {Math.min(Math.round(r.score * 100), 100)}%
                       </div>
                     </div>
                   ))}
@@ -233,7 +273,7 @@ export default function ResultsView({
               Related Videos
             </h3>
             <div className="space-y-4">
-              {rest.slice(0, 3).map((r) => {
+              {otherVideosList.slice(0, 3).map((r) => {
                 const thumbUrl = `https://img.youtube.com/vi/${getYouTubeId(r.payload.url)}/mqdefault.jpg`;
                 return (
                   <div
@@ -253,12 +293,12 @@ export default function ResultsView({
                       {r.payload.primaryTopic}
                     </div>
                     <div className="text-[10px] text-[#666666] mt-1 italic select-none">
-                      Match Level: {Math.round(r.score * 100)}%
+                      Match Level: {Math.min(Math.round(r.score * 100), 100)}%
                     </div>
                   </div>
                 );
               })}
-              {rest.length === 0 && (
+              {otherVideosList.length === 0 && (
                 <div className="text-xs text-[#555555] italic select-none">
                   No additional videos loaded.
                 </div>

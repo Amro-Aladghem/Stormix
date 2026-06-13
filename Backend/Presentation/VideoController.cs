@@ -23,7 +23,7 @@ namespace Presentation
             _videoExtractedService = videoExtractedService;
         }
 
-        [HttpGet("search")]
+        [HttpPost("search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

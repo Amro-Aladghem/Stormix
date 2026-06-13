@@ -23,10 +23,9 @@ export default function EmptyState({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const presetSuggestions = [
-    "Claude Design System",
-    "MCP Connectors tutorial",
-    "Cursor rules vibe coding",
-    "How to use Google GenAI SDK",
+    "Claude Design",
+    "Cursor",
+    "Codex Skills",
   ];
 
   return (
@@ -41,10 +40,10 @@ export default function EmptyState({
           <Youtube className="w-5 h-5" />
         </div>
         <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight leading-normal">
-          Search <span className="text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/25">Stormix</span> understands YouTube videos
+          Search <span className="text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/25">Stormix</span> understands YouTube videos with AI
         </h1>
         <p className="mt-3.5 text-xs md:text-sm text-muted-foreground max-w-md leading-relaxed">
-          Search or enter any specific YouTube video link to segment and navigate directly to key highlights instantly.
+          Currently optimized for Claude, Codex, Cursor, Vibe coding Video Topics.
         </p>
       </motion.div>
 
@@ -65,7 +64,7 @@ export default function EmptyState({
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setShowHistory(true)}
             onBlur={() => setTimeout(() => setShowHistory(false), 200)}
-            placeholder="e.g. Claude design system, MCP connectors, or any YouTube link…"
+            placeholder="e.g. Claude design system, MCP connectors …"
             className="flex-1 bg-transparent py-2.5 text-xs md:text-sm outline-none placeholder:text-[#666666] min-w-0"
           />
           <button

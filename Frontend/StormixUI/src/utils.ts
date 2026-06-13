@@ -36,9 +36,7 @@ export function extractTags(text: string): string[] {
       tags.push(match[1].toLowerCase());
     }
   }
-  // Extract specific tech keywords as tags for visual highlights
-  const common = ["mcp", "cursor", "claude", "react", "vite", "gemini", "agent", "coding", "vibe", "llm"];
-  const lowercaseText = text.toLowerCase();
+const common = ["claude", "cursor", "codex", "mcp", "agents", "skills", "projects", "artifacts", "connectors", "prompting", "vision", "web-search", "automation", "workflow", "productivity", "coding", "integration", "context", "cli", "api", "sdk", "authentication", "deployment", "hosting", "pricing", "subscription", "account-setup", "rag", "vector-db", "embeddings", "tool-calling", "memory", "vibe-coding", "code-generation", "code-review", "debugging", "refactoring", "testing", "cursor-rules", "agent-mode", "codebase-chat", "github", "git", "terminal", "fastapi", "nextjs", "react", "python", "dotnet", "typescript"];  const lowercaseText = text.toLowerCase();
   common.forEach((word) => {
     if (lowercaseText.includes(word) && !tags.includes(word)) {
       tags.push(word);

@@ -60,7 +60,7 @@ export default function ResultCard({ rank, result, onClick, usedTags }: ResultCa
         <div className="flex flex-col items-end gap-2 shrink-0">
           <div className="text-[11px] font-bold font-mono text-primary flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
             <Sparkles className="w-2.5 h-2.5" />
-            <span>{matchPercentage}%</span>
+            <span>{matchPercentage>=100?100:matchPercentage}%</span>
           </div>
           
           {thumb && (
