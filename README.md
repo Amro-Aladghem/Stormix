@@ -5,6 +5,14 @@
 Stormix is an AI-powered search engine designed for developers.
 
 Instead of searching only by video titles or descriptions, Stormix indexes the actual content of videos and helps you find the exact segment where a topic is discussed.
+<p align="center">
+  <img
+    width="750"
+    height="350"
+    alt="Stormix Screenshot"
+    src="https://github.com/user-attachments/assets/c12cadbf-018c-4305-9f12-017176dc6eb1"
+  />
+</p>
 
 ## Why Stormix?
 
@@ -31,6 +39,8 @@ Stormix aims to solve that problem.
 - 🎯 Primary topic extraction
 - 📺 Embedded YouTube playback
 - ⚡ Fast developer-focused search experience
+
+https://github.com/user-attachments/assets/4eaccf32-72f0-4934-abad-aa8bf4182281
 
 ## Current Focus
 
